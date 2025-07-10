@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    #table {
+        border: 1px solid; position: absolute; top:80px; background-color: white;
+    }
+    td {
+        width: 110px;
+    }
+    th {
+        background-color:grey;
+        color: #FFFFFF;
+    }
+</style>
+<script>
+    //Faz enable ou disable com campo dataVolta, caso o utilizador decidir por um voo só de ida, ou ida e volta.
+    function ativarCampos(){
+       var x = document.getElementById("idI");
+       if(x.checked){
+           document.getElementById("dataVolta").disabled = true;
+       }else{
+           document.getElementById("dataVolta").disabled = false;
+       }
+    }
+
+    //Criar campos dinamicos para inserir as idades do numero de crianças inseridas pelo utilizador
+    function criarCamposCrianças() {
+        var nCrianças = document.getElementById("idSelectPaxC");
+        var numero = nCrianças.options[nCrianças.selectedIndex].innerText;
+        var criarTx = document.getElementById("idadesCriancas");
+        console.log(numero);
+        criarTx.innerHTML="";
+        for(var i = 0; i < numero;i++){
+            var tb = document.createElement('input');
+            tb.type = 'text';
+            tb.id = 'c' + i;
+            tb.style.width=50+"px";
+            tb.style.marginRight= 10 + "px";
+            tb.placeholder = "Idd. C " + (i+1);
+            criarTx.appendChild(tb);
+            criarTx.innerHTML += "<br><br>";
+
+
+        }
+        function downloadCampos() {
+            $content = file_get_contents('https://www.momondo.pt/flightsearch/?Search=true&TripType=2&SegNo=2&SO0=LIS&SD0=OPO&SDP0=31-01-2018&SO1=OPO&SD1=LIS&SDP1=07-02-2018&AD=1&TK=ECO&DO=false&NA=false&currency=EUR');
+
+        }
+    }
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>Flight Finder!</title>
+</head>
+<body>
+<div>
+    <h3>Introduza os seus dados</h3>
+    <form action="">
+        <label>Aeroporto de Partida:</label>
+        <input id="idTxtAeroportoP" type="text" name="aeroP" placeholder="Campo Obrigatório" required="required">
+        <label>Aeroporto de Destino:</label>
+        <input id="idTxtAeroportoC" type="text" name="aeroD" placeholder="Campo Obrigatório" required="required">
+        <br>
+        <br>
+        <label>Quantos passageiros adultos:</label>
+        <select id="idSelectPaxA" name="passageirosA">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+        <br>
+        <br>
+        <label>Quantos passageiros crianças:</label>
+        <select id="idSelectPaxC" name="passageirosC" onchange="criarCamposCrianças()">
+            <option value="0" selected>0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+        </select>
+        <br>
+        <br>
+        <div id="idadesCriancas"></div>
+        <label>Moeda Monetária:</label>
+        <select id="idSelectMoney" name="dinheiro">
+            <option value="EUR" selected>EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="USD">USD</option>
+        </select>
+        <br>
+        <br>
+        <label>Tipo de bilhete:</label>
+        <select id="idSelectType" name="classeViagem">
+            <option value="ECO" selected>Económica</option>
+            <option value="ECP">Económica Premium</option>
+            <option value="EXE">Executive</option>
+            <option value="PC">Primeira Classe</option>
+        </select>
+        <br>
+        <h4>Datas</h4>
+        <input id="idIv" type="radio" name="opData" value="idaVolta" onclick="ativarCampos()" checked> Ida e Volta
+        <input id="idI" type="radio" name="opData" onclick="ativarCampos()"  value="soIda"> Só Ida
+        <br>
+        <br>
+        <label>Data de Partida:</label>
+        <input type="date" name="dataP" placeholder="YYYY-MM-DD">
+        <label>Data de Regresso:</label>
+        <input id="dataVolta" type="date" name="dataV" placeholder="YYYY-MM-DD">
+
+        <br>
+        <br>
+
+        <input type="submit" value="Procurar">
+    </form>
+</div>
+<div>
+    <h3>Resultados</h3>
+    <div>
+        <table id="tabelaResultados">
+            <tr>
+                <th>Companhia</th>
+                <td id="companhiaOrigem">Ryanair</td>
+                <th>Aeroporto</th>
+                <td>LIS</td>
+                <th>Data</th>
+                <td>2018-12-25</td>
+                <th>Hora Partida</th>
+                <td>15:22</td>
+                <th>Hora Chegada</th>
+                <td>18:52</td>
+            </tr>
+            <tr>
+                <th>Companhia</th>
+                <td id="companhiaPartida">TAP</td>
+                <th>Aeroporto</th>
+                <td>OPO</td>
+                <th>Data</th>
+                <td>2018-12-26</td>
+                <th>Hora Partida</th>
+                <td>15:22</td>
+                <th>Hora Chegada</th>
+                <td>18:52</td>
+            </tr>
+            <tr>
+                <th>Adultos</th>
+                <td>1</td>
+                <th>Crianças</th>
+                <td>0</td>
+                <th>Preço</th>
+                <td>55 €</td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>

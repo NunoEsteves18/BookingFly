@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <title>AirControl Made by: Micael Castelo, Luís Martins, Nelson Gonçalves</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+	<style>
+	
+    html, body {
+    height: 100%;
+	//background-image: url(/aviao.png);
+	background-size: 100%;
+	background-repeat:no-repeat;
+    }
+    p {
+        display: inline-block;
+    }
+	#chave{
+	position: absolute; margin-left: 290px; top:50px;
+	}
+	#pesquisa{
+	position: absolute; top: 49px; margin-left:445px;
+	}
+    #map {
+    height:60%; width:50%; position: absolute;  top:60px; left: 700px; border:2px solid;
+    }
+	#table {
+    border: 1px solid; position: absolute; top:80px; background-color: white;
+	}
+	td {
+    width: 110px;
+	}
+	th {
+	background-color:grey;
+	}
+	#hh1{
+	position: absolute; margin-left: 10px; top:0px; color:white; font-size:120%;
+	} 
+	#select1{
+	position: absolute;	margin-left: 10px; top:50px; width:100px; font-size:100%;
+	}
+	#hh2{
+	position: absolute;	margin-left: 150px;	top:0px; color:white; font-size:120%;
+	} 
+	#select2{
+	position: absolute;	margin-left: 150px;	top:50px; width: 100px; font-size:100%;
+	}
+	#hh3{
+	position: absolute;	margin-left: 290px;	top:0px; color:white; font-size:120%;
+	}
+	.oMarquee {
+	 position: fixed; top: 38em; margin-left: 0px; width: 1400px; height: 40px; background-color: white;
+	 border: 2px groove; visibility: visible; display: inline;
+	}
+	#marquee{
+        display: inline;
+	font-size: 150%;
+	}
+	</style>
+	</head>
+  
+  <body>
+  <!-- Div para o rodape-->
+	<div class="oMarquee">
+    <marquee id ="slide">
+	</marquee>
+	</div>
+	<!-- criacao das combobox's -->
+	<h3 id="hh1">Tipo de voo:</h3>
+	<select id="select1">
+		<option value="Dep">Partidas</option>
+		<option value="Arr">Chegadas</option>
+	</select>
+	<h3 id="hh2">Aeroporto:</h3>
+	<select id="select2">
+		<option value="LIS" onclick="colocarPedido();">Lisboa</option>
+		<option value="OPO" onclick="colocarPedido();">Porto</option>
+		<option value="FNC" onclick="colocarPedido();">Funchal</option>
+	</select>
+		<h3 id="hh3">Pesquisa:</h3>
+		
+		<!-- criacao da tabela -->
+	<table id="table">
+	<tr>
+	<th>Nr do voo</th><th>Comp. Aérea</th><th>Longitude</th><th>Latidude</th><th>Origem</th><th>Destino</th>
+	</tr>
+	<tr>
+	<td id="idVoo1"></td><td id ="idComp1"></td><td id ="idLon1"></td><td id ="idLat1"></td><td id ="idOri1"></td><td id ="idDest1"></td><td id="desTag1" style="display:none;"></td>
+	</tr>
+	<tr>
+	<td id="idVoo2"></td><td id ="idComp2"></td><td id ="idLon2"></td><td id ="idLat2"></td><td id ="idOri2"></td><td id ="idDest2"></td><td id="desTag2" style="display:none;"></td>
+	</tr>
+	<tr>
+	<td id = "idVoo3"></td><td id ="idComp3"></td><td id ="idLon3"></td><td id ="idLat3"></td><td id ="idOri3"></td><td id ="idDest3"></td><td id="desTag3" style="display:none;"></td>
+	</tr>
+	<tr>
+	<td id ="idVoo4"></td><td id ="idComp4"></td><td id ="idLon4"></td><td id ="idLat4"></td><td id ="idOri4"></td><td id ="idDest4"></td><td id="desTag4" style="display:none;"></td>
+	</tr>
+	<tr>
+	<td id = "idVoo5"></td><td id ="idComp5"></td><td id ="idLon5"></td><td id ="idLat5"></td><td  id ="idOri5"></td><td id ="idDest5"></td><td id="desTag5" style="display:none;"></td>
+	</tr>
+	</table>
+
+    <input id="chave" type="text" width="10" placeholder="Insira o numero do voo "/>
+    <input type="button" id="pesquisa" value="Obter localização" onclick="obterDadosMapa();"/>
+	<div id="map" ></div>
+	
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCcdgVWfFAYSScutCNLWzlZAqBr-iY6i1g&callback=desenhaMapa" async defer></script>   
+<script>
+		//criacao de variaveis globais 
+    var id;
+    var fID = undefined;
+	var fTracker;
+    var fPositions;
+    var compAe;
+    var origem;
+    var destino;
+	var lat = 39.223474; 
+    var nDestino;
+	var lon =-8.690551;
+  function desenhaMapa() {
+		var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat:  Number(lat), lng: Number(lon)},
+          zoom: 8
+        });
+		var imagem ='http://s33.postimg.org/jozsdnla7/aiplane_icon.png'; //link para o icon 
+		var marker = new google.maps.Marker({
+		position: {lat:  Number(lat), lng: Number(lon)},
+		map: map,
+		title:"Latitude: " + lat +"\n" +"Longitude: " +lon, //titulo no marcador
+		icon: imagem
+  });
+      }
+  function tratarDadosXML(dadosXML) // aplica a transformação xml -> dom
+	{ 	var xmlDoc;
+		if (navigator.userAgent.indexOf('NET')== -1) // verifica se se trata de um browser diferente do IE
+		{	parser = new DOMParser(); // cria a instância (objeto) do parser XML->DOM
+			xmlDoc = dadosXML; //parser.parseFromString( dadosXML, "text/xml"); // faz a transformação	
+		}
+		else 	// no caso de ser o MS IE!
+		{	xmlDoc=new ActiveXObject("Microsoft.XMLDOM");	// cria uma árvore DOM vazia 
+			xmlDoc.async=false;   // configura o comportamento da transformação
+			xmlDoc.load(dadosXML); // executa a transformação
+		}
+		return xmlDoc;  // devolve a árvore DOM
+    }
+  function colocarPedido(args)
+  { document.getElementById("pesquisa").disabled=true; //Desabilitar o botao enquanto estamos a colocar o pedido a API
+      var destino = document.getElementById("select1"); 
+      var vDestino = destino.options[destino.selectedIndex].text; //Guardar o valor seleccionado 
+      var Aeroporto = document.getElementById("select2");
+      var vAeroporto = Aeroporto.options[Aeroporto.selectedIndex].text; //Guardar o valor seleccionado 
+       vDestino= verificaDestino(vDestino); //guardar a transformação feita no metodo
+       vAeroporto = verificaAero(vAeroporto);//guardar a transformação feita no metodo
+    var xmlhttp = new XMLHttpRequest();
+    var url = "https://api.flightstats.com/flex/flightstatus/rest/v2/xml/airport/tracks/"+ vAeroporto +"/" + vDestino +"?appId=7adccfc2&appKey=03485ac75ac81ade8857dc97ed4e71d0&includeFlightPlan=false&maxPositions=1&maxFlights=5&extendedOptions=%27useHttpErrors%27";
+
+    xmlhttp.onreadystatechange=function(){
+       if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+       {   var DOMDoc=tratarDadosXML(xmlhttp.responseXML);
+          document.getElementById("pesquisa").disabled=false; //Reactivar o botao sendo que o pedido esta concluido
+          mostrarDados(DOMDoc);
+       }
+    };
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+  }
+    function verificaDestino( vDestino){ //funcao para transformar os valores escolhidos pelo utilizador em valores que funcionem no link da API
+        if(vDestino == "Chegadas") {
+            vDestino = "arr";
+        }
+        else { vDestino = "dep";}
+     return vDestino;
+    }
+    function verificaAero(vAeroporto){ //funcao para transformar os valores escolhidos pelo utilizador em valores que funcionem no link da API
+        switch (vAeroporto) {
+            case vAeroporto = "Lisboa":
+                vAeroporto = "LIS";
+                break;
+            case vAeroporto ="Porto":
+                vAeroporto = "OPO";
+                break;
+           case vAeroporto ="Funchal":
+                vAeroporto = "FNC";
+                break;
+        }
+            return vAeroporto;
+    }
+  function mostrarDados(DOMDoc)
+	{ 
+      if (navigator.userAgent.indexOf('NET')== -1) // verifica se se trata de um browser diferente do IE
+        {  alert("Este website só funciona no Internet Explorer.")}
+        else //IE
+        {   fTracker=DOMDoc.selectNodes("//flightTrack");//Selecção dos nodes de flightTrack do XML que resulta do pedido ao link da API
+            fPositions = DOMDoc.selectNodes("//position");//Selecção dos nodes de position do XML que resulta do pedido ao link da API
+            if (fTracker.length == 0)
+            {  alert("Não foi encontrado nenhum voo");}
+            else // encontrar o numero do voo
+            {  id =1;
+			    var aCompanhia;// criacao de variaveis necessarias para criar os resultados pretendidos fora do ciclo para optimizar o codigo
+				var Companhia; 
+				var oAeroporto;
+				var nAeroporto;
+				var oDestino; 
+                for (i=0; i<fTracker.length; i++)
+            {    fID=fTracker[i].selectSingleNode("flightNumber").text;//inserir o numero de voo na variavel 
+                compAe=fTracker[i].selectSingleNode("carrierFsCode").text; //inserir o codigo FS do carrier na variavel
+                lat = fPositions[i].selectSingleNode("lat" ).text; // inserir a latitude do voo na variavel
+                lon = fPositions[i].selectSingleNode("lon" ).text; // inserir a longitude do voo na variavel
+                origem=fTracker[i].selectSingleNode("departureAirportFsCode").text; // inserir o codigo FS do aeroporto de partida na variavel
+                destino=fTracker[i].selectSingleNode("arrivalAirportFsCode").text; //inserir o codigo FS do aeroporto de chegada na variavel
+				 aCompanhia = DOMDoc.selectNodes("//airline[fs='" +compAe +"']" ); //utilizando o codigo FS do carrier deste voo, vamos buscar o codigo da companhia aerea
+				 Companhia = aCompanhia[0].selectSingleNode("name").text; //utilizando o codigo da companhia aerea, podemos agora ir buscar o nome por extenso dessa companhia aerea
+				 oAeroporto = DOMDoc.selectNodes("//airport[fs='" + origem + "']");//Ao usar o codigo FS do aeroporto de origem, vamos buscar o codigo do Aeroporto
+				 nAeroporto = oAeroporto[0].selectSingleNode("name").text;//Ao sabermos o seu codigo, vamos entao buscar o seu nome por extenso
+				 oDestino = DOMDoc.selectNodes("//airport[fs='" + destino + "']");
+				 nDestino = oDestino[0].selectSingleNode("name").text;
+
+                document.getElementById("idVoo" + id).innerHTML=fID ; //codigo para introduzir os valores recebidos acima, na tabela
+                document.getElementById("idComp" + id).innerHTML="<p>"+Companhia+"</p>";
+                document.getElementById("idLon" + id).innerHTML=lon;
+                document.getElementById("idLat" + id).innerHTML=lat;
+                document.getElementById("idOri" + id).innerHTML="<p>"+nAeroporto+"</p>";
+                document.getElementById("idDest" + id).innerHTML="<p>"+nDestino+"</p>";
+                document.getElementById("desTag" + id).innerHTML=destino; // insercao de uma tag de destino numa celula que nao esta visivel para facilitar 
+																		  // futuros tratamentos de dados				
+            id++;
+            }
+        }
+	}}
+	function obterDadosMapa() { //Depois da tabela estar completa, o utilizador pode escolher um voo para ver no mapa e receber mais informacoes sobre o mesmo
+       var nrVoo = document.getElementById('chave'); // inserir na variavel o valor que o utilizador inseriu na textbox
+       var idTab1 = document.getElementById('table'); // variavel para se retirar valores da tabela
+            switch (nrVoo.value){
+                case nrVoo.value = idTab1.rows[1].cells[0].innerHTML:
+                    lon = idTab1.rows[1].cells[2].innerHTML;
+                    lat = idTab1.rows[1].cells[3].innerHTML;
+					nDestino = idTab1.rows[1].cells[5].innerHTML;
+                    destino = idTab1.rows[1].cells[6].innerHTML;
+                    break;
+                case nrVoo.value = idTab1.rows[2].cells[0].innerHTML:
+                    lon = idTab1.rows[2].cells[2].innerHTML;
+                    lat = idTab1.rows[2].cells[3].innerHTML;
+                    nDestino = idTab1.rows[2].cells[5].innerHTML;
+                    destino = idTab1.rows[2].cells[6].innerHTML;
+                    break;
+                case nrVoo.value = idTab1.rows[3].cells[0].innerHTML:
+                    lon = idTab1.rows[3].cells[2].innerHTML;
+                    lat = idTab1.rows[3].cells[3].innerHTML;
+                    nDestino = idTab1.rows[3].cells[5].innerHTML;
+                    destino = idTab1.rows[3].cells[6].innerHTML;
+                    break;
+                case nrVoo.value = idTab1.rows[4].cells[0].innerHTML:
+                    lon = idTab1.rows[4].cells[2].innerHTML;
+                    lat = idTab1.rows[4].cells[3].innerHTML;
+                    nDestino = idTab1.rows[4].cells[5].innerHTML;
+                    destino = idTab1.rows[4].cells[6].innerHTML;
+                    break;
+                case nrVoo.value = idTab1.rows[5].cells[0].innerHTML:
+                    lon = idTab1.rows[5].cells[2].innerHTML;
+                    lat = idTab1.rows[5].cells[3].innerHTML;
+                    nDestino = idTab1.rows[5].cells[5].innerHTML;
+                    destino = idTab1.rows[5].cells[6].innerHTML;
+                    break;
+            }
+        desenhaMapa();//agora com todos os dados necessarios e criado o mapa do aviao escolhido pelo utilizador
+        obterTempDestino();//em funcao do voo escolhido vamos obter os dados meterologicos do aeroporto de destino
+    }
+    function obterTempDestino(){//esta funcao vai enviar o pedido com o url da API e retornar o XML que nos e necessario
+        var xmlhttp = new XMLHttpRequest();
+        var url ="https://api.flightstats.com/flex/weather/rest/v1/xml/all/" + destino +"?appId=7adccfc2&appKey=03485ac75ac81ade8857dc97ed4e71d0"; //url da API de metereologia
+        xmlhttp.onreadystatechange=function(){
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+            {   var DOMDoc=tratarDadosXML(xmlhttp.responseXML);
+                mostrarTemp(DOMDoc);
+            }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+    }
+    function mostrarTemp(DOMDoc){//funcao para inserir as condicoes metereologicas no rodape
+        var fTemp=DOMDoc.selectNodes("//metar");
+        var fSky = DOMDoc.selectNodes("//skyCondition");
+		var fVento = DOMDoc.selectNodes("//wind");
+        if (fTemp.length == 0)
+        {  alert("Não foi encontrado nenhuma temperatura para esse destino.");}
+        else // encontrar o numero do voo
+        {
+             var  condicaoTemp=fSky[0].selectSingleNode("coverage").text;
+              var  temp=fTemp[0].selectSingleNode("temperatureCelsius").text;
+			
+            document.getElementById("slide").innerHTML= "<p>"+"The weather in the "+ " " +nDestino + " is: "+ condicaoTemp + " and the temperature is: " + temp + " ºC enjoy your flight."+"</p>";
+    }}
+</script>     
+</body>
+</html>
